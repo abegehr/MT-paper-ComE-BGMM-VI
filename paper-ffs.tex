@@ -73,6 +73,18 @@
 
 \section{Introduction}
 
+Graphs, such as social networks, knowledge graphs, content-rating graphs, and communication networks, emerge naturally from various real-world situations. Analyzing these graphs leads to findings and understanding of the underlying structures, coherences, and dependencies. Recently, methods for embedding graph's nodes into lower-dimensional Euclidean spaces, called graph embeddings, have gained traction in multiple areas of data science research.\cite{Goyal_2018}
+
+Community Embeddings, in addition to embedding a graph's nodes through first- and second-order proximity, also preserve higher-order proximity by embedding clusters present in the graph data. The graph and community embedding algorithm ComE aims to preserve first-, second- and higher-order proximity by embedding a graph's nodes and communities.\cite{ComE} ComE requires prior knowledge of the number of communities $K$. In this paper, ComE is extended to utilizing a Bayesian Gaussian mixture model with variational inference for learning community embeddings (ComE BGMM+VI), similar to ComE+ published by \citeauthor{ComE+} in \citeyear{ComE+}.\cite{ComE+} ComE BGMM+VI takes $K$ as the maximum number of communities and drops components through a trade-off hyperparameter.
+
+The recent \citeyear{ComE} graph embeddings algorithm ComE is extended similarily to the \citeyear{ComE+} ComE+ by taking a Bayesian approach. The open-source code for the Bayesian approach to ComE's community embedding is published on GitHub\footnote{at \citeurl{ComE_BGMM_GH}} and serves as a contribution to community embedding research.\cite{ComE_BGMM_GH}
+
+The original ComE paper \citetitle{ComE} by \citeauthor{ComE} and the ComE+ paper \citetitle{ComE+} by \citeauthor{ComE+} in combination with the ComE source code have provided the basis and architecture for the community embeddings utilized in this work.\cite{ComE, ComE+, ComE_GH}
+
+Multiple surveys and articles on graph embeddings were consulted to build a full picture of the current state of graph embedding research. Especially the \citeyear{Goyal_2018} survey \citetitle{Goyal_2018} by \citeauthor{Goyal_2018} and the \citeyear{rossi20tkdd-roles} paper \citetitle{rossi20tkdd-roles} by \citeauthor{rossi20tkdd-roles} have proven to be primary resources for understanding the current landscape of graph embedding research.\cite{Goyal_2018, rossi20tkdd-roles}
+
+On part of comparing the Bayesian Gaussian mixture model with variational inference to the Gaussian mixture model with expectation-maximization, the \citeyear{Bishop06} book \citetitle{Bishop06} by \citeauthor{Bishop06} includes essential statistics and information science knowledge and explanations.\cite{Bishop06}
+
 
 
 %%% Bibliography
