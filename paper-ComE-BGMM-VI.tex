@@ -16,6 +16,7 @@
 \usepackage{subcaption}
 \usepackage[super]{nth}
 \usepackage{url}
+\usepackage{tabularx}
 
 \def\UrlBreaks{\do\/\do-}
 
@@ -85,7 +86,148 @@ Multiple surveys and articles on graph embeddings were consulted to build a full
 
 On part of comparing the Bayesian Gaussian mixture model with variational inference to the Gaussian mixture model with expectation-maximization, the \citeyear{Bishop06} book \textit{Pattern Recognition and Machine Learning (Information Science and Statistics)} by \citeauthor{Bishop06} includes essential statistics and information science knowledge and explanations \cite{Bishop06}.
 
+\section{Graph Embedding}
+
+A graph embedding is a representation of a graph data structure in lower-dimensional space. Utilizing graph embeddings has recently gained traction in the research community for representing and analyzing graph data \cite{Goyal_2018}. Possible applications of graph embeddings include node and graph classification, anomaly detection, link prediction, recommender systems, graph compression, and visualizations \cite{rossi20tkdd-roles}.
+
+There are multiple advantages of graph embeddings over the original graph data-structure $G = (V, E)$:
+
+\begin{enumerate}
+    \item \textbf{Machine learning algorithms on graphs are limited \cite{Godec2018}}.Only specific mathematics, statistics, and machine learning algorithms can be applied to the specific graph data-structure $G$ consisting of nodes $V$ and edges $E$.
+    \item \textbf{Vector operations are simpler and faster than comparable graph operations \cite{Godec2018}.} A graph embedding is a representation of a graph in lower-dimensional space of dimension $d$, therefore nodes are assigned a feature vector of size $d$, which can then be operated on using vector operations.
+    \item \textbf{Embeddings are compressed representations \cite{Godec2018}.} A trivial feature vector for a node $v \in V$ of the graph $G = (V, E)$ is of length $\abs{V}$ with an entry for each node $v_i \in V$ valued by the existing or non-existing, binary or weighted edge. When determining this trivial representation for all nodes $v \in V$, the adjacency matrix of size $\abs{V} \times \abs{V}$ is obtained. An embedding of the same graph $G = (V, E)$ is obtained through embedding $G$ into a $d$-dimensional space. The resulting embedding is of size $\abs{V} \times d$. An embedding is performed into a lower-dimensional space, therefore $d \ll \abs{V}$.
+\end{enumerate}
+
+Popular graph embedding algorithms include DeepWalk, introduced by \citeauthor{Perozzi2014DeepWalkOL} in their \citeyear{Perozzi2014DeepWalkOL} paper \textit{DeepWalk}, and Node2Vec, introduced by \citeauthor{Grover2016node2vecSF} in their \citeyear{Grover2016node2vecSF} paper \textit{node2vec: Scalable Feature Learning for Networks} \cite{Perozzi2014DeepWalkOL, Grover2016node2vecSF}. Both DeepWalk and Node2Vec demonstrate competitive results for the use-case of multi-label classification and are promising options for graph embeddings.
+
 \section{Community Embedding}
+
+Recently, a graph embedding algorithm was altered and extended to include the concept of communities. Communities refer to groups of nodes that have high inner connectivity and low outer connectivity to other communities \cite{ComE}. The proximity of nodes hereby is extended to include the concept of higher-order proximity, in addition to first-order and second-order-proximity \cite{ComE}.
+
+\citeauthor{ComE} developed the Community Embedding algorithm ComE in their \citeyear{ComE} paper \textit{Learning Community Embedding with Community Detection and Node Embedding on Graphs} \cite{ComE}.
+
+\subsection{ComE Algorithm}
+\label{sec:ComE_alg}
+
+ComE consists of three parts: node embedding, community detection, and community embedding. A closed-loop relationship between node embedding, community detection, and community embedding is indicated by \citeauthor{ComE}. The closed-loop is exploited in an iterative algorithm optimizing the node and community embeddings.
+
+The ComE algorithm is sketched out as follows:
+
+\begin{enumerate}
+    \item Sample the graph by executing random walks.
+    \item Initialize the node embedding $\Phi$ and context embedding $\Phi'$ with the node embedding algorithm DeepWalk\cite{Perozzi2014DeepWalkOL} with random walks.
+    \item Fit a Gaussian mixture model (GMM) representing communities to $(\Phi, \Phi')$ using the expectation-maximization (EM) algorithm, while keeping $(\Phi, \Phi')$ fixed. Yield the parameters of the GMM as the community embedding: mixed community membership $\Pi$, Gaussian means $\Psi$, and Gaussian covariances $\Sigma$.
+    \item Use stochastic decent with first-, second-, and higher-order proximity optimization functions to adjust $(\Phi, \Phi')$ to the Gaussian mixture model, keeping the GMM's parameters $(\Pi, \Psi, \Sigma)$ fixed. Yield the next node embedding and context embedding $(\Phi, \Phi')$ updated by first-, second-, and higher-order proximity.
+    \item Repeat steps 3 and 4 at will. Step 3 represents community detection and embedding. Step 4 represents updating the node embedding.
+\end{enumerate}
+
+The formulas and concepts used in this chapter are borrowed from the original ComE paper.\cite{ComE} For a pseudocode implementation including more detail, see algorithm 1 of the original ComE paper \cite{ComE}. \citeauthor{ComE_GH} published an implementation of the ComE algorithm on GitHub\footnote{at \url{https://github.com/andompesta/ComE}}.
+
+\subsection{ComE Hyperparameters}
+\label{sec:ComE_params}
+
+ComE requires multiple hyperparameters to be set prior to computation. The following table lists the hyperparameters, a description for each, and the notation used in literature:
+
+\begin{table}[htbp]
+    \centering
+    \caption{Hyperparameters used by \citeauthor{ComE_GH}'s implementation of ComE \cite{ComE_GH}.}
+    \label{table:params_ComE}
+    \begin{tabularx}{\linewidth}{ l | c | X }
+        parameter            & notation & description                                                                     \\
+        \hline
+        \hline
+        number\_walks        & $\gamma$ & number of random walks for each node                                            \\
+        \hline
+        walk\_length         & $\ell$   & length of each walk                                                             \\
+        \hline
+        representation\_size & $D$      & dimensionality of the embedding                                                 \\
+        \hline
+        num\_workers         & \empty   & number of threads                                                               \\
+        \hline
+        num\_iter            & \empty   & number of overall iterations                                                    \\
+        \hline
+        com\_n\_init         & \empty   & number of initializations to run on the communtiy embedding model (GMM or BGMM) \\
+        \hline
+        reg\_covar           & \empty   & regularization coefficient for ensuring positive covariance                     \\
+        \hline
+        batch\_size          & \empty   & size of the batch                                                               \\
+        \hline
+        window\_size         & $\zeta$  & windows size used to compute the context embedding                              \\
+        \hline
+        negative             & $m$      & number of negative samples                                                      \\
+        \hline
+        lr                   & \empty   & learning rate                                                                   \\
+        \hline
+        alpha                & $\alpha$ & Trade-off parameter for context embedding                                       \\
+        \hline
+        beta                 & $\beta$  & Trade-off parameter for community embedding                                     \\
+        \hline
+        down\_sampling       & \empty   & perform down sampling of common nodes                                           \\
+        \hline
+        communities          & $K$      & number of communities                                                           \\
+    \end{tabularx}
+\end{table}
+
+\subsection{Non-Bayesian and Bayesian Gaussian mixture models}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{.4\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/ComE/GMM.png}
+        \caption{Non-Bayesian}
+    \end{subfigure}%
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/ComE/BGMM.png}
+        \caption{Bayesian}
+    \end{subfigure}%
+    \caption{Gaussian mixture models in plate notation\protect\footnotemark.}
+    \label{fig:GMM_vs_BGMM_plates}
+\end{figure}
+\footnotetext{By Benwing - Created using LaTeX, TikZ, CC BY 3.0, \url{https://commons.wikimedia.org/w/index.php?curid=18934624}}
+
+Figure \ref{fig:GMM_vs_BGMM_plates} compares a non-Bayesian and a Bayesian GMM side-by-side in plate notation: Squares indicate fixed parameters and circles indicate random variables.
+
+The Bayesian Gaussian mixture model assumes all parameters of the Gaussian mixture model (number of communities $K$, means $\mu_k$, and covariances $\sigma_k$) are themselves generated by some distribution. This is represented in the plate diagrams in Figure \ref{fig:GMM_vs_BGMM_plates}.
+
+A Bayesian Gaussian mixture model (BGMM) with variational inference (VI) offers a solution to the issue of introducing the number of communities $K$ as a fixed parameter, by taking advantage of Bayesian methods.
+
+A BGMM with VI tends to utilize some components heavily while eliminating other components, if the provided dataset suggests so, by applying a tradeoff parameter. Therefore, the parameter $K$ represents a maximum of communities and not the final number of communities like for GMMs.
+
+\subsection{Algorithm ComE BGMM+VI}
+\label{sec:ComE_BGMM_alg}
+
+The algorithm can stay mostly unchanged to the algorithm sketched out in Section \ref{sec:ComE_alg}. Only steps 3 and 4 need to be adjusted to handle community detection and embedding and node embeddings using a Bayesian Gaussian mixture model (BGMM) with variational inference (VI) instead of a non-Bayesian Gaussian mixture model (GMM) with expectation-maximization (EM).
+
+A Bayesian Gaussian mixture model, just like a non-Bayesian Gaussian mixture model, produces mixed community membership $\Pi$, which means $\Psi$, and covariances $\Sigma$ for communities based on node embeddings $\Phi$. Therefore, the inputs and outputs of step 3 stay the same.
+
+In their \citeyear{ComE+} paper \textit{Embedding Both Finite and Infinite Communities on Graphs}, \citeauthor{ComE+} present their version of ComE with an infinite Bayesian-approach to community detection and embedding. As of the time of writing of this paper, no source code for ComE+ was published. While ComE+ and ComE BGMM+VI both take a Bayesian approach to community embedding, ComE+ redefined the optimization function for higher-order proximity based on the Bayesian Gaussian mixture model, while ComE BGMM+VI simply uses a BGMM for community embedding and detection and leaves the node embedding step unchanged.
+
+The implementation of ComE BGMM+VI\footnote{ComE BGMM+VI is published at \url{https://github.com/abegehr/ComE_BGMM} \cite{ComE_BGMM_GH}.} presented and used in this paper, utilizes sklearn's implementation of the Bayesian Gaussian mixture model and variational inference references at \textit{sklearn.mixture.BayesianGaussianMixture}.\cite{scikit-learn, sklearn_api}
+
+\subsection{Hyperparameters BGMM}
+\label{ComE_BGMM_params}
+
+Switching from the original ComE's GMM to a Bayesian GMM, will require one additional parameter: the BGMM's weight concentration prior, or simply concentration.
+
+The BGMM's concentration is a trade-off parameter that directly influences the number of components utilized for community embedding. A higher concentration parameter leads to more components active. A lower concentration parameter leads to fewer components active.
+
+ComE with BGMM and VI has the same hyperparameters as ComE with GMM and EM, as presented in Section \ref{sec:ComE_params}, and in addition also the following:
+
+\begin{table}[htbp]
+    \centering
+    \caption{Hyperparameter added to ComE for supporting a BGMM for community embedding \cite{ComE_BGMM_GH}.}
+    \label{table:params_ComE_BGMM}
+    \begin{tabularx}{\linewidth}{ l | c | X }
+        parameter                    & notation & description                               \\
+        \hline
+        \hline
+        weight\_concentration\_prior & $\Gamma$ & Bayesian GMM's weight concentration prior \\
+    \end{tabularx}
+\end{table}
+
+
 
 
 
