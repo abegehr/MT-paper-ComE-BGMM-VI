@@ -17,6 +17,9 @@
 \usepackage[super]{nth}
 \usepackage{url}
 \usepackage{tabularx}
+\usepackage{longtable,multicol,makecell}
+\usepackage{pgfplots}
+
 
 \def\UrlBreaks{\do\/\do-}
 
@@ -244,7 +247,7 @@ The following hyperparameters are used for computing both ComE with GMM and BGMM
 
 \begin{table}[H]
     \centering
-    \caption{Hyperparameters used for the Karate Club dataset. See Table \ref{table:params_ComE} for descriptions of hyperparameters.}
+    \caption{Hyperparameters used for the Karate Club dataset.}
     \label{table:params_KCvisual}
     \begin{tabular}{ l | c | r }
         parameter                    & notation & value        \\
@@ -281,6 +284,8 @@ The following hyperparameters are used for computing both ComE with GMM and BGMM
         weight\_concentration\_prior & $\Gamma$ & $10^{-5}$    \\
     \end{tabular}
 \end{table}
+
+See Table \ref{table:params_ComE} for a descriptions of the hyperparameters.
 
 For each $K \in [2,3,4,15]$ embeddings based on ComE with GMM and ComE with BGMM are computed. Each combination of a $K$ and choice of a mixture model for community detection and embedding, three charts are obtained:
 
@@ -353,6 +358,400 @@ Providing $K=15$ at initialization further underlines the potential advantage of
 As hypothesized, the community embedding algorithm ComE underperforms when the hyperparameter number of communities $K$ is unknown. A Bayesian approach with variational inference similar to ComE+ is proposed to use the tradeoff parameter weight concentration before dropping unused communities if $K$ is chosen too high.
 
 The small Karate Club dataset, consisting only of 34 nodes, is used to test the hypothesis through a visual comparison experiment. The Karate Club graph is embedded into two-dimensional Euclidean space with ComE and ComE BGMM+VI for multiple values for the hyperparameter number of communities $K = [2, 3, 4, 15]$. The hypothesized advantage of BGMM over GMM for unknown numbers of communities $K$ when embedding with ComE becomes clear. Even with $K=15$, ComE BGMM+VI identifies the $2$ communities, while the non-Bayesian ComE utilizes all $15$ communities.
+
+
+\section{Quantitative Evaluation}
+\label{ch:come_eval}
+
+In their original \citeyear{ComE} paper \textit{Learning Community Embedding with Community Detection and Node Embedding on Graphs}, \citeauthor{ComE} identify three evaluation tasks for experimentation: graph visualization, community detection and node classification \cite{ComE}. Community detection and node classification can objectivelly be quantitatively evaluated, while graph visualization is subjectively evaluated.
+
+In this section, community embeddings based on a non-Bayesian Gaussian Mixture Model with Expectation-maximization (GMM+EM), as presented with the ComE algorithm, and community embeddings based on a Bayesian Gaussian Mixture Model with Variational Inference (BGMM+VI), similar to the ComE+ algorithm, are evaluated quantitatively over multiple values for the number of communities $K$ hyperparameter.
+
+\section{DBLP Dataset}
+
+To evaluate ComE GMM+EM and ComE BGMM+VI on the tasks graph visualization, community detection, and node classification, the DBLP dataset is considered:
+
+\begin{table}[H]
+    \centering
+    \caption{Dataset used for quantitative evaluation.}
+    \label{table:evaluation_datasets}
+    \begin{tabular}{ c || c | c | c | c }
+        \thead{graph                                                                            \\$G=(V, E)$} & \thead{\#(node)\\$\abs{V}$} & \thead{\#(edge)\\$\abs{E}$} & \thead{\#(class)\\$K$} & \thead{\#(label)/node} \\
+        \hline
+        \hline
+        \makecell{DBLP} & \makecell{13,184} & \makecell{48,018} & \makecell{5} & \makecell{$1$} \\
+    \end{tabular}
+\end{table}
+
+\subsection{Hyperparameters}
+\label{sec:come_eval_hyper-params}
+
+For comparability, the same hyperparameters are used for ComE GMM+EM and for the proposed ComE BGMM+VI, with the addition of the weight concentration prior hyperparameter for ComE BGMM+VI. The following hyperparameters were used for evaluating the DBLP dataset:
+
+\begin{table}[H]
+    \centering
+    \caption{Hyperparameters used for the DBLP dataset. See Table \ref{table:params_ComE} for descriptions of hyperparameters.}
+    \label{table:params_DBLP}
+    \begin{tabular}{ l | c | r }
+        parameter                    & notation & value         \\
+        \hline
+        \hline
+        number\_walks                & $\gamma$ & $10$          \\
+        \hline
+        walk\_length                 & $\ell$   & $80$          \\
+        \hline
+        representation\_size         & $D$      & $[128, 2]$    \\
+        \hline
+        num\_workers                 & \empty   & $10$          \\
+        \hline
+        num\_iter                    & \empty   & $3$           \\
+        \hline
+        com\_n\_init                 & \empty   & $10$          \\
+        \hline
+        reg\_covar                   & \empty   & $0.00001$     \\
+        \hline
+        batch\_size                  & \empty   & $50$          \\
+        \hline
+        window\_size                 & $\zeta$  & $10$          \\
+        \hline
+        negative                     & $m$      & $5$           \\
+        \hline
+        lr                           & \empty   & $0.025$       \\
+        \hline
+        alpha                        & $\alpha$ & $0.1$         \\
+        \hline
+        beta                         & $\beta$  & $0.1$         \\
+        \hline
+        down\_sampling               & \empty   & $0.0$         \\
+        \hline
+        communities                  & $K$      & $[2,5,10,20]$ \\
+        \hline
+        weight\_concentration\_prior & $\Gamma$ & $10^{-5}$     \\
+    \end{tabular}
+\end{table}
+
+See Table \ref{table:params_ComE} for a descriptions of the hyperparameters.
+
+In addition to varying the hyper-parameter number of communities $K$, the dimensionality of the representation (representation\_size) is varied. The tasks are evaluated for two-dimensional and 128-dimensional embeddings to determine the effect of embedding size on the quality of results.
+
+
+\subsection{Community Detection}
+
+Community detection references the task of clustering nodes into communities and comparing the detected communities to the true communities as obtained from the true node classifications. The evaluation metrics are conductance and NMI.
+
+
+\subsubsection{Conductance}
+
+Figure \ref{fig:dblp_conductance} shows the conductance obtained from communities generated with ComE GMM+EM and ComE BGMM+VI on the DBLP graph with two- and 128-dimensional embeddings. Lower conductance is better.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \pgfplotstableread[row sep=\\,col sep=&]{
+                K	& GMM					& BGMM					\\
+                2	& 0.02054029917392275	& 0.021070234113712373	\\
+                5	& 0.030399077942659558	& 0.02551070276610302	\\
+                10	& 0.01722986509950581	& 0.030197444831591175					\\
+                20	& 0.029249335242380856	& 0.03289726818006926	\\
+            }\mydata
+            \begin{axis}[
+                    ybar,
+                    bar width=.5cm,
+                    width=\linewidth,
+                    height=\linewidth,
+                    legend style={at={(0.5,1)},
+                            anchor=north,legend columns=-1},
+                    symbolic x coords={2,5,10,20},
+                    xtick=data,
+                    point meta={y*100},
+                    yticklabel= {\pgfmathparse{\tick*100}\pgfmathprintnumber{\pgfmathresult}\%},
+                    ymin=0, ymax=0.15,
+                    xlabel={$K$},
+                    ylabel={Conductance},
+                    nodes near coords={\pgfmathprintnumber\pgfplotspointmeta\%},
+                    nodes near coords align={vertical},
+                ]
+                \addplot table[x=K,y=GMM]{\mydata};
+                \addplot table[x=K,y=BGMM]{\mydata};
+                \legend{GMM, BGMM}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{two-dimensional embeddings.}
+        \label{fig:dblp_conductance_d2}
+    \end{subfigure}%
+    %
+    \begin{subfigure}{.5\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \pgfplotstableread[row sep=\\,col sep=&]{
+                K	& GMM					& BGMM					\\
+                2	& 0.02072897576868255	& 0.05153027478804642	\\
+                5	& 0.013701852396354014	& 0.011492883939736796	\\
+                10	& 0.06247833021288399	& 0.04919872794163497					\\
+                20	& 0.11969825263644061	& 0.07018888966334426 \\
+            }\mydata
+            \begin{axis}[
+                    ybar,
+                    bar width=.5cm,
+                    width=\linewidth,
+                    height=\linewidth,
+                    legend style={at={(0.5,1)},
+                            anchor=north,legend columns=-1},
+                    symbolic x coords={2,5,10,20},
+                    xtick=data,
+                    point meta={y*100},
+                    yticklabel= {\pgfmathparse{\tick*100}\pgfmathprintnumber{\pgfmathresult}\%},
+                    ymin=0, ymax=0.15,
+                    xlabel={$K$},
+                    nodes near coords={\pgfmathprintnumber\pgfplotspointmeta\%},
+                    nodes near coords align={vertical},
+                ]
+                \addplot table[x=K,y=GMM]{\mydata};
+                \addplot table[x=K,y=BGMM]{\mydata};
+                \legend{GMM, BGMM}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{128-dimensional embeddings.}
+        \label{fig:dblp_conductance_d128}
+    \end{subfigure}
+
+    \caption{Conductance on DBLP dataset. Lower conductance is better.}
+    \label{fig:dblp_conductance}
+\end{figure}
+
+As was expected, the conductance achieved with the true hyperparameter number of communities $K=5$ is very similar for GMM and BGMM. The conductance achieved for $K=2$ is similar for two-dimensional embeddings and higher for BGMM for 128-dimensional embeddings.
+
+The conductances for $K=10$ and $K=20$ are different depending on the dimensionality of the embedding. For a large representation size of 128 dimensions (see Figure \ref{fig:dblp_conductance_d128}), the conductance for the tested values for $K$ where $K>5$ increases in variability and decreases in overall quality in comparison to the smaller representation size of 2 dimensions (see Figure \ref{fig:dblp_conductance_d2}), where the conductance stays mostly the same with $K=10$ and $K=20$.
+
+Although ComE BGMM+VI produces better conductance than ComE GMM+EM for $K>5$, a clear advantage of BGMM over GMM for community embeddings can not be identified from this experiment alone.
+
+\subsubsection{Normalized Mutual Information}
+\label{sec:eval_nmi}
+
+Figure \ref{fig:dblp_nmi} shows the NMIs obtained from communities generated by ComE GMM+EM and ComE BGMM+VI with two- and 128-dimensional embeddings on the DBLP graph. Higher NMI is better.
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \pgfplotstableread[row sep=\\,col sep=&]{
+                K	& GMM					& BGMM					\\
+                2	& 0.4636647057169119	& 0.4623820822063423	\\
+                5	& 0.46257130393293455		& 0.46502447614120096		\\
+                10	& 0.43349289423082416		& 0.46005304584573076		\\
+                20	& 0.3999601374635516	& 0.45371067853180896	\\
+            }\mydata
+            \begin{axis}[
+                    ybar,
+                    bar width=.5cm,
+                    width=\linewidth,
+                    height=\linewidth,
+                    legend style={at={(0.5,1)},
+                            anchor=north,legend columns=-1},
+                    symbolic x coords={2,5,10,20},
+                    xtick=data,
+                    nodes near coords,
+                    nodes near coords align={vertical},
+                    ymin=0,ymax=1,
+                    xlabel={$K$},
+                    ylabel={NMI},
+                ]
+                \addplot table[x=K,y=GMM]{\mydata};
+                \addplot table[x=K,y=BGMM]{\mydata};
+                \legend{GMM, BGMM}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{two-dimensional embeddings.}
+        \label{fig:dblp_nmi_d2}
+    \end{subfigure}%
+    %
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \pgfplotstableread[row sep=\\,col sep=&]{
+                K	& GMM					& BGMM					\\
+                2	& 0.4802479401582417	& 0.43575239496704926	\\
+                5	& 0.6746848015894669		& 0.668553614850714		\\
+                10	& 0.4963225850192131		& 0.47369605057376785		\\
+                20	& 0.3018911505699723	& 0.30816578800908423	\\
+            }\mydata
+            \begin{axis}[
+                    ybar,
+                    bar width=.5cm,
+                    width=\linewidth,
+                    height=\linewidth,
+                    legend style={at={(0.5,1)},
+                            anchor=north,legend columns=-1},
+                    symbolic x coords={2,5,10,20},
+                    xtick=data,
+                    nodes near coords,
+                    nodes near coords align={vertical},
+                    ymin=0,ymax=1,
+                    xlabel={$K$},
+                ]
+                \addplot table[x=K,y=GMM]{\mydata};
+                \addplot table[x=K,y=BGMM]{\mydata};
+                \legend{GMM, BGMM}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{128-dimensional embeddings.}
+        \label{fig:dblp_nmi_d128}
+    \end{subfigure}
+
+    \caption{NMI on DBLP dataset. Higher NMI is better.}
+    \label{fig:dblp_nmi}
+\end{figure}
+
+
+ComE GMM+EM and ComE BGMM+VI perform very similar for the true hyperparameter number of communities $K=5$ over both two-dimensional and 128-dimensional embeddings, as was to be expected. The controlling experiment $K=2$ produces similar results for GMM and BGMM as well for both two- and 128-dimensional embeddings.
+
+ComE GMM+EM achieves an NMI of $0.675$ and ComE BGMM+VI achieves an NMI of $0.669$ for the 128-dimensional embedding.
+\citeauthor{ComE} state an NMI of over $0.7$ for the ComE algorithm \cite{ComE}. It is not clearly stated how many iterations are run specifically on DBLP in the original ComE paper, but it is stated that ComE converges within two or three iterations.\cite{ComE} In this experiment three iterations were applied, as stated in Section \ref{sec:come_eval_hyper-params}.
+
+With two-dimensional embeddings, an around $0.2$ units smaller NMI is achieved for $K=K^*=5$ than for the 128-dimensional embedding. It seems that the two-dimensional embedding is not capable to capture the complexity of the graph as well as the 128-dimensional embedding.
+
+The advantage of a smaller embedding becomes clearer for larger values of $K>K^*$. For $K=20$ the NMI for the 128-dimensional embedding is around $0.3$, while the BGMM two-dimensional embedding manages to hold at $0.45$.
+
+It seems that for higher $K>5$, ComE BGMM+VI can maintain higher NMI values for the two-dimensional embedding, while for the 128-dimensional embeddings, ComE BGMM+VI is not able to maintain the NMI score. Section \ref{sec:eval_DBLP_result_k} explores the different behavior of ComE BGMM+VI on low- and higher-dimensional embeddings further in comparison to ComE GMM+EM.
+
+
+\subsection{Number of Communities and Dimensionality}
+\label{sec:eval_DBLP_result_k}
+
+To understand why ComE BGMM+VI is able to maintain an NMI score for larger values of $K$ for the two-dimensional embedding, but not for the 128-dimensional embedding, the weights of the components for $K=20$ is presented:
+
+\begin{figure}[H]
+    \centering
+    % K=5
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/eval/weights_BGMM_d2_k5.png}
+        \caption{D=2, K=5}
+        \label{fig:dblp_weights_d2_k5}
+    \end{subfigure}%
+    %
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/eval/weights_BGMM_d128_k5.png}
+        \caption{D=128, K=5}
+        \label{fig:dblp_weights_d128_k5}
+    \end{subfigure}
+    % K=10
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/eval/weights_BGMM_d2_k10.png}
+        \caption{D=2, K=10}
+        \label{fig:dblp_weights_d2_k10}
+    \end{subfigure}%
+    %
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/eval/weights_BGMM_d128_k10.png}
+        \caption{D=128, K=10}
+        \label{fig:dblp_weights_d128_k10}
+    \end{subfigure}
+    % K=20
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/eval/weights_BGMM_d2_k20.png}
+        \caption{D=2, K=20}
+        \label{fig:dblp_weights_d2_k20}
+    \end{subfigure}%
+    %
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{images/eval/weights_BGMM_d128_k20.png}
+        \caption{D=128, K=20}
+        \label{fig:dblp_weights_d128_k20}
+    \end{subfigure}
+
+    \caption{Weights of communties generated by ComE BGMM+VI over hyperparameters representation sizes $D=[2, 128]$ and number of communities $K=[5, 10, 20]$.}
+    \label{fig:dblp_weights}
+\end{figure}
+
+Figure \ref{fig:dblp_weights} shows in subfigures \ref{fig:dblp_weights_d2_k5}, \ref{fig:dblp_weights_d2_k10}, and \ref{fig:dblp_weights_d2_k20}, that ComE BGMM+VI is able to identify $K=5$ communities for the initial hyperparameter settings $K=[5, 10, 20]$ if a two-dimensional embedding is choosen. For the 128-dimensional embeddings in subfigures \ref{fig:dblp_weights_d128_k5}, \ref{fig:dblp_weights_d128_k10}, and \ref{fig:dblp_weights_d128_k20}, ComE BGMM+VI is not able to drop communities to identify the $K=5$ with initial values of $K=[5,10,20]$.
+
+The finding from comparing community weights over the two- and 128-dimensional embedding of ComE BGMM+VI not dropping components for the 128-dimensional embeddings could explain the observation in Section \ref{sec:eval_nmi} of a better NMI for $D=2$ when $K=20$.
+
+It is left for future work to consider different weight concentration priors and further explorations into the ability of BGMM and variational inference to unused drop components dependant of the dimensionality of input space.
+
+
+\section{Results of Node Classification}
+
+Figure \ref{table:dblp_f1} shows the results of ComE GMM+EM and ComE BGMM+VI on the task node classification compared over multiple values for the hyperparameter number of communities $K$. The evaluation metrics micro- and macro-F1 used for node classification are described in Section \ref{sec:come_eval_metrics_nc}.
+
+First, embeddings are generated from the whole graph. Then, node classification is done by a support vector machine (SVM), which is trained on $90\%$ of the node embeddings and tested on the remaining $10\%$ of node embeddings. The two- or 128-dimensional node embeddings are used as features for the support vector machine.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}[b]{\linewidth}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ l | l | c | c | c | c }
+                \hline
+                \empty                         & \#(communities) $K$ & 2             & 5             & 10            & 20            \\
+                \hline
+                \hline
+                \multirow{2}{*}{Micro-F1 (\%)} & ComE BGMM+VI        & \textbf{67.1} & 67.2          & 66.2          & \textbf{67.0} \\
+                                               & ComE                & 66.9          & \textbf{67.4} & \textbf{66.6} & 66.5          \\
+                \hline
+                \multirow{2}{*}{Macro-F1 (\%)} & ComE BGMM+VI        & \textbf{50.9} & 49.6          & 48.6          & \textbf{49.6} \\
+                                               & ComE                & 50.0          & \textbf{50.0} & \textbf{49.3} & 49.0          \\
+                \hline
+            \end{tabular}
+            \caption{two-dimensional embeddings.}
+            \label{table:dblp_f1_d2}
+        \end{table}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{\linewidth}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{ l | l | c | c | c | c }
+                \hline
+                \empty                         & \#(communities) $K$ & 2             & 5             & 10            & 20            \\
+                \hline
+                \hline
+                \multirow{2}{*}{Micro-F1 (\%)} & ComE BGMM+VI        & 92.6          & \textbf{92.6} & \textbf{93.3} & 92.3          \\
+                                               & ComE                & 92.6          & 92.5          & 93.2          & \textbf{92.7} \\
+                \hline
+                \multirow{2}{*}{Macro-F1 (\%)} & ComE BGMM+VI        & \textbf{92.7} & \textbf{92.4} & \textbf{93.0} & 91.9          \\
+                                               & ComE                & 92.6          & 92.3          & 92.9          & \textbf{92.7} \\
+                \hline
+            \end{tabular}
+            \caption{128-dimensional embeddings.}
+            \label{table:dblp_f1_d128}
+        \end{table}
+    \end{subfigure}
+
+    \caption{Micro- and Macro-F1 on the DBLP dataset with two- and 128-dimensional embeddings. Higher F1 values are better.}
+    \label{table:dblp_f1}
+\end{figure}
+
+The Micro- and Macro-F1 scores attained by ComE GMM+EM and ComE BGMM+VI node embeddings through an SVM are very similar. No advantage of one over the other can be determined from the results. The similarity between results for node classification could be due to the specialties of the used DBLP dataset. To gain more clarity, further datasets should be evaluated in future work.
+
+
+\subsection{Summary}
+
+Although a better conductance was achieved for large $K$ on the 128-dimensional embedding, a clear advantage of ComE BGMM+VI over ComE GMM+EM can not be identified for conductance over one experiment.
+
+For NMI, ComE BGMM+VI seems to perform slightly better than ComE when choosing a two-dimensional embedding instead of a 128-dimensional embedding and larger initial number of communities that the true number of communities: $K>K^*$. It is hypothesized that this advantage comes from the ability of BGMM+VI to drop unused components in lower-dimensional space. It appears that BGMM+VI does not drop components as easy in higher-dimensional space.
+
+Examining the weights of components produced by ComE BGMM+VI in two- and 128-dimensional space provides the insight, that ComE BGMM+VI produces the same distributions of 5 components' weights for $K=5$, $K=10$, and $K=20$ in two-dimensional space. In 128-dimensional space, on the other hand, ComE BGMM+VI does not drop components and remains with weight distributions including all the components added at initialization. In future work, it might be interesting to explore the weight concentration prior or other mechanisms of the BGMM+VI to allow ComE to drop unused communities at higher dimensionality as well.
+
+Evaluation of node classification aims to quantify the quality of classifications generated by node embeddings. Firstly, embeddings are generated for the whole graph. Then, a support vector machine (SVM) is trained with $90\%$ of the 128-dimensional node embeddings as features and true labels as target values. Ultimately, the micro- and macro-F1 scores are determined for the remaining $10\%$ testing data. In the experiment of the DBLP dataset, no advantage of using ComE BGMM+VI over GMM+EM was identified for node classification. It is reasonable to note, that node classification with micro- and macro-F1 of over $90\%$ is achieved, with the 128-dimensional embedding, leaving little room for optimization.
+
+A slight advantage of ComE BGMM+VI over ComE GMM+EM for community detection over the DBLP dataset under specific conditions was identified. No advantage for the task of node classification for ComE BGMM+VI over ComE GMM+EM could be identified for the DBLP dataset.
+
+It was identified, that while the BGMM with variational inference can drop unused components when operating in low dimensional space and achieve the same component weight distributions over multiple initial values for $K$, in high dimensional space, the BGMM does not drop components.
+
+
+
+
 
 
 
