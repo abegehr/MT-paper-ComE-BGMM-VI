@@ -228,6 +228,142 @@ ComE with BGMM and VI has the same hyperparameters as ComE with GMM and EM, as p
 \end{table}
 
 
+\section{Visual Example}
+\label{ch:come_visual}
+
+In this section community embeddings based on a standard Gaussian mixture model with expectation-maximization (GMM+EM) and community embeddings based on a Bayesian Gaussian mixture model with variational inference (BGMM+VI) are compared visually. Two-dimensional visualizations are computed on a small graph-dataset using multiple values for the hyperparameter number of communities $K$ to show the advantage of BGMM+VI over GMM+EM under specific conditions.
+
+\subsection{Karate Club Dataset}
+\label{sec:karate_club}
+
+\textit{Zachary’s Karate Club graph} is a popular graph dataset for visualizing graph algorithms, due to its small size \cite{KarateClubDS}.
+
+The data was collected from a university karate club by \citeauthor{Zachary1977AnIF} as part of the \citeyear{Zachary1977AnIF} paper \textit{Zachary’s Karate Club graph}. The small Karate Club graph consists of 34 nodes, each representing one person as part of the karate club. The presence of an edge represents a social tie among two members of the group. The absence of an edge represents no social tie among the two members of the group. Edges are bidirectional. \textit{Zachary’s Karate Club graph} provided a binary version (ZACHE) and a weighted version (ZACHC) of the graph. We will consider the binary version of the karate club graph.
+
+The following hyperparameters are used for computing both ComE with GMM and BGMM results:
+
+\begin{table}[H]
+    \centering
+    \caption{Hyperparameters used for the Karate Club dataset. See Table \ref{table:params_ComE} for descriptions of hyperparameters.}
+    \label{table:params_KCvisual}
+    \begin{tabular}{ l | c | r }
+        parameter                    & notation & value        \\
+        \hline
+        \hline
+        number\_walks                & $\gamma$ & $10$         \\
+        \hline
+        walk\_length                 & $\ell$   & $80$         \\
+        \hline
+        representation\_size         & $D$      & $2$          \\
+        \hline
+        num\_workers                 & \empty   & $10$         \\
+        \hline
+        num\_iter                    & \empty   & $1$          \\
+        \hline
+        reg\_covar                   & \empty   & $0.00001$    \\
+        \hline
+        batch\_size                  & \empty   & $50$         \\
+        \hline
+        window\_size                 & $\zeta$  & $10$         \\
+        \hline
+        negative                     & $m$      & $5$          \\
+        \hline
+        lr                           & \empty   & $0.025$      \\
+        \hline
+        alpha                        & $\alpha$ & $0.1$        \\
+        \hline
+        beta                         & $\beta$  & $0.1$        \\
+        \hline
+        down\_sampling               & \empty   & $0.0$        \\
+        \hline
+        communities                  & $K$      & $[2,3,4,15]$ \\
+        \hline
+        weight\_concentration\_prior & $\Gamma$ & $10^{-5}$    \\
+    \end{tabular}
+\end{table}
+
+For each $K \in [2,3,4,15]$ embeddings based on ComE with GMM and ComE with BGMM are computed. Each combination of a $K$ and choice of a mixture model for community detection and embedding, three charts are obtained:
+
+\begin{enumerate}
+    \item Graph: nodes positioned using the Fruchterman-Reingold force-directed (spring) algorithm and colored by community assignment.
+    \item Embeddings: obtained node and community embeddings. Ellipses represent communities and the underlying Gaussian component. Points colored by the community assignment represent node embeddings.
+    \item Weights: bar chart of weight for each community.
+\end{enumerate}
+
+\newcommand{\visresults}[2]{
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}{.15\textwidth}
+            \centering
+            \includegraphics[width=1\linewidth]{images/results/#1/graph_#2.png}
+            \caption{Graph}
+        \end{subfigure}%
+        %
+        \begin{subfigure}{.15\textwidth}
+            \centering
+            \includegraphics[width=1\linewidth]{images/results/#1/embeddings_#2.png}
+            \caption{Embeddings}
+        \end{subfigure}%
+        %
+        \begin{subfigure}{.15\textwidth}
+            \centering
+            \includegraphics[width=1\linewidth]{images/results/#1/weights_#2.png}
+            \caption{Weights}
+        \end{subfigure}%
+        %
+        \caption{ComE with #1, $K=#2$}
+        \label{fig:results#1#2}
+    \end{figure}
+}
+
+\subsection{K=2}
+
+\visresults{GMM}{2}
+\visresults{BGMM}{2}
+
+Figure \ref{fig:resultsGMM2} and Figure \ref{fig:resultsBGMM2}.
+Two is the intended number of communities. Setting $K=2$ leads to similar results for both using a GMM and a BGMM for community detection and embedding. Although the labels are inverted, and the separation between both community assignments is slightly different, the general community assignment and structure are the same.
+
+\subsection{K=3}
+
+\visresults{GMM}{3}
+\visresults{BGMM}{3}
+
+Figure \ref{fig:resultsGMM3} and Figure \ref{fig:resultsBGMM3}.
+Choosing $K=3$ leads to worse results when using a GMM in comparison to the BGMM. The GMM utilizes the three components, while the BGMM drops the unnecessary third component and utilizes only the two necessary components.
+
+\subsection{K=4}
+
+\visresults{GMM}{4}
+\visresults{BGMM}{4}
+
+Figure \ref{fig:resultsGMM4} and Figure \ref{fig:resultsBGMM4}.
+With $K=4$, the quality of embeddings based on the GMM further declines. The GMM utilizes all four communities. The result obtained by the BGMM also declines for this example, but wins over the GMM. The BGMM utilizes three communities.
+
+\subsection{K=15}
+
+\visresults{GMM}{15}
+\visresults{BGMM}{15}
+
+Figure \ref{fig:resultsGMM15} and Figure \ref{fig:resultsBGMM15}.
+Providing $K=15$ at initialization further underlines the potential advantage of BGMM over GMM. The GMM utilizes all 15 communities. It is clear that in this dataset of 34 nodes, no 15 communities are necessary for proper representation. The BGMM achieves a visually comparable quality to results at $K=2$ and $K=3$ by only utilizing 2 of the maximum 15 communities for representation.
+
+\subsection{Summary}
+
+As hypothesized, the community embedding algorithm ComE underperforms when the hyperparameter number of communities $K$ is unknown. A Bayesian approach with variational inference similar to ComE+ is proposed to use the tradeoff parameter weight concentration before dropping unused communities if $K$ is chosen too high.
+
+The small Karate Club dataset, consisting only of 34 nodes, is used to test the hypothesis through a visual comparison experiment. The Karate Club graph is embedded into two-dimensional Euclidean space with ComE and ComE BGMM+VI for multiple values for the hyperparameter number of communities $K = [2, 3, 4, 15]$. The hypothesized advantage of BGMM over GMM for unknown numbers of communities $K$ when embedding with ComE becomes clear. Even with $K=15$, ComE BGMM+VI identifies the $2$ communities, while the non-Bayesian ComE utilizes all $15$ communities.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
