@@ -36,7 +36,7 @@
 
 \begin{document}
 
-\title{Community Embeddings for Facebook Friend Suggestions\\
+\title{Community Embeddings with Bayesian Gaussian Mixture Model and Variational Inference\\
     \thanks{The reported study was partially supported by RFBR grant \textnumero 20-07-00958. The paper was prepared within the framework of the HSE University Project Group Competition 2020-2022.}
 }
 
@@ -62,13 +62,12 @@
 
 \begin{abstract}
     Graphs, such as social networks, emerge naturally from various real-world situations. Recently, graph embedding methods have gained traction in data science research.
-    Recommender systems are used in a wide range of business applications and are essential for online e-business models to survive and strive in the contemporary market. Using graph embeddings for recommendation tasks can improve upon recommender systems because of data compression, the feature vector format, and sub-quadratic time complexity on computing embeddings.
-    Graph and community embeddings generated with ComE BGMM+VI are used to build a recommender system for friend suggestions. ComE BGMM+VI is an alteration of the community embeddings algorithm ComE. ComE BGMM+VI applies a Bayesian Gaussian mixture model and variational inference for community embedding and detection.
-    Recommendations are evaluated by the top-N hit-rate for users with at least 50 friends. A friend suggestions recommender system with a top-10 leave-one-out hit-rate of 43.6\% and run-time optimized hit-rate of 32.9\% is presented.
+    The graph and community embedding algorithm ComE aims to preserve first-, second- and higher-order proximity. ComE requires prior knowledge of the number of communities K. In this paper, ComE is extended to utilize a Bayesian Gaussian mixture model with variational inference for learning community embeddings (ComE BGMM+VI), similar to ComE+. ComE BGMM+VI takes K as the maximum number of communities and drops components through the trade-off hyperparameter weight concentration prior.
+    The advantage of ComE BGMM+VI over the non-Bayesian ComE for an unknown number of communities K is shown for the small Karate club dataset and explored for the larger DBLP dataset.
 \end{abstract}
 
 \begin{IEEEkeywords}
-    graph, embedding, community embedding, ComE, recommender systems, friend suggestions
+    graph, embedding, community embedding, ComE, Bayesian, variational inference, Gaussian mixture, expectation maximization
 \end{IEEEkeywords}
 
 
