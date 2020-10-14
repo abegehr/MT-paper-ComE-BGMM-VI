@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.autoSave": "afterDelay",
+		"editor.tabCompletion": "on",
+		"editor.tabSize": 2,
+		"grammarly.domain": "academic",
+		"grammarly.userWords": [
+			"networkx",
+			"egonets",
+			"networkx's"
+		],
+	}
+}
