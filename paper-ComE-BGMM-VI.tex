@@ -619,7 +619,7 @@ ComE GMM+EM achieves an NMI of $0.675$ and ComE BGMM+VI achieves an NMI of $0.66
 
 With two-dimensional embeddings, an around $0.2$ units smaller NMI is achieved for $K=K^*=5$ than for the 128-dimensional embedding. It seems that the two-dimensional embedding is not capable to capture the complexity of the graph as well as the 128-dimensional embedding.
 
-The advantage of a smaller embedding becomes clearer for larger values of $K>K^*$. For $K=20$ the NMI for the 128-dimensional embedding is around $0.3$, while the BGMM two-dimensional embedding manages to hold at $0.45$.
+The potential advantage of a smaller embedding becomes clearer for larger values of $K>K^*$. For $K=20$ the NMI for the 128-dimensional embedding is around $0.3$, while the BGMM two-dimensional embedding manages to hold at $0.45$.
 
 It seems that for higher $K>5$, ComE BGMM+VI can maintain higher NMI values for the two-dimensional embedding, while for the 128-dimensional embeddings, ComE BGMM+VI is not able to maintain the NMI score. Section \ref{sec:eval_DBLP_result_k} explores the different behavior of ComE BGMM+VI on low- and higher-dimensional embeddings further in comparison to ComE GMM+EM.
 
@@ -627,9 +627,7 @@ It seems that for higher $K>5$, ComE BGMM+VI can maintain higher NMI values for 
 \subsection{Number of Communities and Dimensionality}
 \label{sec:eval_DBLP_result_k}
 
-To understand why ComE BGMM+VI is able to maintain an NMI score for larger values of $K$ for the two-dimensional embedding, but not for the 128-dimensional embedding, the weights of the components for $K=20$ is presented:
-
-\begin{figure}[H]
+\begin{figure}
     \centering
     % K=5
     \begin{subfigure}[b]{.5\linewidth}
