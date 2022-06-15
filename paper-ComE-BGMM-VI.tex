@@ -71,7 +71,7 @@
 }
 
 \author{
-    \IEEEauthorblockN{Anton I. N. Begehr}
+    \IEEEauthorblockN{Anton I. N. Begehr, M.Sc.}
     \IEEEauthorblockA{
         \textit{Graduate School of Business}\\
         \textit{National Research University Higher School of Economics}\\
@@ -79,7 +79,7 @@
         a.begehr@fu-berlin.de\\
     }
     \and
-    \IEEEauthorblockN{Prof. Dr. Petr Panfilov}
+    \IEEEauthorblockN{Prof. Dr. Peter B. Panfilov}
     \IEEEauthorblockA{
         \textit{Graduate School of Business}\\
         \textit{National Research University Higher School of Economics}\\
@@ -110,13 +110,16 @@ Community Embeddings, in addition to embedding a graph's nodes through first- an
 \visresults{GMM}{15}
 \visresults{BGMM}{15}
 
-The recent \citeyear{ComE} graph embeddings algorithm ComE is extended similarily to the \citeyear{ComE+} ComE+ by taking a Bayesian approach. The open-source code for the Bayesian approach to ComE's community embedding is published on GitHub\footnote{at \url{https://github.com/abegehr/ComE_BGMM}} and serves as a contribution to community embedding research \cite{ComE_BGMM_GH}.
+The recent \citeyear{ComE} graph embeddings algorithm ComE is extended similarily to the \citeyear{ComE+} ComE+ by taking a Bayesian approach. The open-source code for the Bayesian approach to ComE's community embedding is published on GitHub\footnote{at \url{https://github.com/abegehr/ComE_BGMM}} and serves as a contribution to community embedding research \cite{ComE_BGMM_GH}. The source code is written in Python and tested with Python 3.6.10. For node and context embedding, ComE's training\_sdg\_inner Cython binary is utilized \cite{van1995python, ComE_GH}.
 
 The original ComE paper \textit{Learning Community Embedding with Community Detection and Node Embedding on Graphs} by \citeauthor{ComE} and the ComE+ paper \textit{Embedding Both Finite and Infinite Communities on Graphs} by \citeauthor{ComE+} in combination with the ComE source code have provided the basis and architecture for the community embeddings utilized in this work \cite{ComE, ComE+, ComE_GH}.
 
-Multiple surveys and articles on graph embeddings were consulted to build a full picture of the current state of graph embedding research. Especially the \citeyear{Goyal_2018} survey \textit{Graph Embedding Techniques, Applications, and Performance: A Survey} by \citeauthor{Goyal_2018} and the \citeyear{rossi20tkdd-roles} paper \textit{On Proximity and Structural Role-based Embeddings in Networks: Misconceptions, Techniques, and Applications} by \citeauthor{rossi20tkdd-roles} have proven to be primary resources for understanding the current landscape of graph embedding research \cite{Goyal_2018, rossi20tkdd-roles}.
+Surveys and articles on graph embeddings were consulted to build a full picture of the current state of graph embedding research. Especially the \citeyear{Goyal_2018} survey \textit{Graph Embedding Techniques, Applications, and Performance: A Survey} by \citeauthor{Goyal_2018} and the \citeyear{rossi20tkdd-roles} paper \textit{On Proximity and Structural Role-based Embeddings in Networks: Misconceptions, Techniques, and Applications} by \citeauthor{rossi20tkdd-roles} have proven to be primary resources for understanding the current landscape of graph embedding research \cite{Goyal_2018, rossi20tkdd-roles}.
 
 On part of comparing the Bayesian Gaussian mixture model with variational inference to the Gaussian mixture model with expectation-maximization, the \citeyear{Bishop06} book \textit{Pattern Recognition and Machine Learning (Information Science and Statistics)} by \citeauthor{Bishop06} includes essential statistics and information science knowledge and explanations \cite{Bishop06}.
+
+During implementation, data transformation, testing, and plotting the following libraries and frameworks have proved invaluable: NumPy, Pandas, Matplotlib, NetworkX, and Jupyter Notebooks \cite{harris2020array, mckinney-proc-scipy-2010, reback2020pandas, Hunter:2007, SciPyProceedings_11, Kluyver2016jupyter}.
+
 
 \section{Graph Embedding}
 
@@ -190,15 +193,17 @@ ComE requires multiple hyperparameters to be set prior to computation. The follo
         \hline
         lr                   & \empty   & learning rate                                                                   \\
         \hline
-        alpha                & $\alpha$ & Trade-off parameter for context embedding                                       \\
+        alpha                & $\alpha$ & trade-off parameter for context embedding                                       \\
         \hline
-        beta                 & $\beta$  & Trade-off parameter for community embedding                                     \\
+        beta                 & $\beta$  & trade-off parameter for community embedding                                     \\
         \hline
         down\_sampling       & \empty   & perform down sampling of common nodes                                           \\
         \hline
         communities          & $K$      & number of communities                                                           \\
     \end{tabularx}
 \end{table}
+
+The hyperparameters number\_walks, walk\_length, and representation\_size are utilised in the node embedding step Node2Vec to achieve an initial node embedding optimizing for first and second oder proximity. reg\_covar,  batch\_size, window\_size, negative, and lr are utilized in the context embedding step. num\_workers is a performance parameter which allows multithreading the node embedding or context embedding steps. num\_iter, and com\_n\_init control the number of iterations to run over ComE's closed loop algorithm and how many random initialisations of the community embedding to try out, respectivelly. alpha and beta allow adjusting the weighting between context and community embedding. Communities $K$ is the number of Gaussian generators as pertained to the Gaussian Mixture Model.
 
 \subsection{Non-Bayesian and Bayesian Gaussian mixture models}
 
@@ -258,7 +263,6 @@ ComE with BGMM and VI has the same hyperparameters as ComE with GMM and EM, as p
         weight\_concentration\_prior & $\Gamma$ & Bayesian GMM's weight concentration prior \\
     \end{tabularx}
 \end{table}
-
 
 \section{Visual Example}
 \label{ch:come_visual}
@@ -615,7 +619,7 @@ ComE GMM+EM achieves an NMI of $0.675$ and ComE BGMM+VI achieves an NMI of $0.66
 
 With two-dimensional embeddings, an around $0.2$ units smaller NMI is achieved for $K=K^*=5$ than for the 128-dimensional embedding. It seems that the two-dimensional embedding is not capable to capture the complexity of the graph as well as the 128-dimensional embedding.
 
-The advantage of a smaller embedding becomes clearer for larger values of $K>K^*$. For $K=20$ the NMI for the 128-dimensional embedding is around $0.3$, while the BGMM two-dimensional embedding manages to hold at $0.45$.
+The potential advantage of a smaller embedding becomes clearer for larger values of $K>K^*$. For $K=20$ the NMI for the 128-dimensional embedding is around $0.3$, while the BGMM two-dimensional embedding manages to hold at $0.45$.
 
 It seems that for higher $K>5$, ComE BGMM+VI can maintain higher NMI values for the two-dimensional embedding, while for the 128-dimensional embeddings, ComE BGMM+VI is not able to maintain the NMI score. Section \ref{sec:eval_DBLP_result_k} explores the different behavior of ComE BGMM+VI on low- and higher-dimensional embeddings further in comparison to ComE GMM+EM.
 
@@ -623,9 +627,7 @@ It seems that for higher $K>5$, ComE BGMM+VI can maintain higher NMI values for 
 \subsection{Number of Communities and Dimensionality}
 \label{sec:eval_DBLP_result_k}
 
-To understand why ComE BGMM+VI is able to maintain an NMI score for larger values of $K$ for the two-dimensional embedding, but not for the 128-dimensional embedding, the weights of the components for $K=20$ is presented:
-
-\begin{figure}[H]
+\begin{figure}
     \centering
     % K=5
     \begin{subfigure}[b]{.5\linewidth}
